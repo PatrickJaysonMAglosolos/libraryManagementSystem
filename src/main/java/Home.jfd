@@ -1,0 +1,52 @@
+JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space :p:50:p, comp jButton1:::p::p, space :p:82:p, comp jButton2:::p::p, space :p:111:p, comp jButton3:::p::p, space ::211:x, comp jButton4:::p::p, space :p:112:p, comp jButton5:::p::p, space :p:96:p, comp jButton6:::p::p, space :p:66:p}}"
+			"$verticalGroup": "par l {seq l {space :p:36:p, par b {comp jButton1::b:p::p, comp jButton2::b:p::p, comp jButton3::b:p::p, comp jButton4::b:p::p, comp jButton5::b:p::p, comp jButton6::b:p::p}, space ::670:x}}"
+		} ) {
+			name: "this"
+			"defaultCloseOperation": 3
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "jButton1"
+				"font": new java.awt.Font( "Tahoma", 1, 14 )
+				"text": "New Student"
+				"preferredSize": new java.awt.Dimension( 159, 59 )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "jButton1ActionPerformed", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "jButton2"
+				"font": new java.awt.Font( "Tahoma", 1, 14 )
+				"text": "New Book"
+				"preferredSize": new java.awt.Dimension( 159, 59 )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "jButton3"
+				"font": new java.awt.Font( "Tahoma", 1, 14 )
+				"text": "Statistics"
+				"preferredSize": new java.awt.Dimension( 159, 59 )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "jButton4"
+				"font": new java.awt.Font( "Tahoma", 1, 14 )
+				"text": "Issue Book"
+				"preferredSize": new java.awt.Dimension( 159, 59 )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "jButton5"
+				"font": new java.awt.Font( "Tahoma", 1, 14 )
+				"text": "Return Book"
+				"preferredSize": new java.awt.Dimension( 159, 59 )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "jButton6"
+				"font": new java.awt.Font( "Tahoma", 1, 14 )
+				"text": "Logout"
+				"preferredSize": new java.awt.Dimension( 159, 59 )
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "jButton6ActionPerformed", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) )
+	}
+}
