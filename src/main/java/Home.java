@@ -49,14 +49,14 @@ public class Home extends javax.swing.JFrame {
         btnSearch.setText("Search");
         btnSearch.addActionListener(this::btnSearchActionPerformed);
 
-        booksTable.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        booksTable.setFont(new java.awt.Font("Tahoma", 1, 14));
         booksTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
+                {001, null, null, null},
+                {002, null, null, null},
+                {003, null, null, null},
+                {004, null, null, null},
+                {005, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null},
@@ -90,9 +90,11 @@ public class Home extends javax.swing.JFrame {
 
         btnAdd.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnAdd.setText("Add");
+        btnAdd.addActionListener(this::btnAddActionPerformed);
 
         btnRemove.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnRemove.setText("Remove");
+        btnRemove.addActionListener(this::btnRemoveActionPerformed);
 
         btnBorrow.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnBorrow.setText("Borrow");
@@ -117,7 +119,7 @@ public class Home extends javax.swing.JFrame {
                 .addComponent(searchBar, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(139, Short.MAX_VALUE)
+                .addContainerGap(149, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(38, 38, 38)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -160,21 +162,83 @@ public class Home extends javax.swing.JFrame {
 
     private void btnReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnActionPerformed
         // TODO add your handling code here:
-        
+        int selectedRow = booksTable.getSelectedRow();
+    if (selectedRow != -1) {
+        booksTable.setValueAt("Available", selectedRow, 3);
+    }
     }//GEN-LAST:event_btnReturnActionPerformed
 
     private void btnBorrowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrowActionPerformed
         // TODO add your handling code here:
+        int selectedRow = booksTable.getSelectedRow();
+    if (selectedRow != -1) {
+        booksTable.setValueAt("Borrowed", selectedRow, 3);
+    }
     }//GEN-LAST:event_btnBorrowActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
         // TODO add your handling code here:
-        System.exit(0);
+    int response = JOptionPane.showConfirmDialog(this, 
+        "Are you sure you want to logout?", 
+        "Confirm Logout", 
+        JOptionPane.YES_NO_OPTION);
+    
+    if (response == JOptionPane.YES_OPTION) {
+        // 2. Create an instance of the Login page
+        Login loginPage = new Login();
+        
+        // 3. Make the Login page visible
+        loginPage.setVisible(true);
+        
+        // 4. Close the current Home page
+        this.dispose(); 
+    }
     }//GEN-LAST:event_btnLogoutActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         // TODO add your handling code here:
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) booksTable.getModel();
+    int rowCount = model.getRowCount();
+    if (rowCount == 0) return;
+
+    // Extract IDs into an array for Heap Sort
+    int[] ids = new int[rowCount];
+    for (int i = 0; i < rowCount; i++) {
+        Object val = model.getValueAt(i, 0);
+        ids[i] = (val == null) ? 0 : Integer.parseInt(val.toString());
+    }
+
+    // Use your heapSort method
+    heapSort(ids);
+
+    // Update the ID column with sorted values
+    for (int i = 0; i < rowCount; i++) {
+        model.setValueAt(ids[i], i, 0);
+    }
+    JOptionPane.showMessageDialog(this, "Table sorted by ID using Heap Sort.");
     }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        // TODO add your handling code here:
+        String id = JOptionPane.showInputDialog(this, "Enter Book ID:");
+    String title = JOptionPane.showInputDialog(this, "Enter Book Title:");
+    String author = JOptionPane.showInputDialog(this, "Enter Author:");
+    
+    if (id != null && title != null) {
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) booksTable.getModel();
+        model.addRow(new Object[]{id, title, author, "Available"});
+    }
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
+        // TODO add your handling code here:
+        int selectedRow = booksTable.getSelectedRow();
+    if (selectedRow != -1) {
+        ((javax.swing.table.DefaultTableModel) booksTable.getModel()).removeRow(selectedRow);
+    } else {
+        JOptionPane.showMessageDialog(this, "Please select a book to remove.");
+    }
+    }//GEN-LAST:event_btnRemoveActionPerformed
 
     /**
      * @param args the command line arguments
