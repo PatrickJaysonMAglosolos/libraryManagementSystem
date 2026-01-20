@@ -194,8 +194,7 @@ public class homePage extends javax.swing.JFrame {
     }//GEN-LAST:event_btnReturnActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        // TODO add your handling code here:
-        // Get text from your search bar (replace txtSearch with your variable name)
+        // TODO add your handling code here:       
     String searchKeyword = searchBar.getText();
     DatabaseHandler.searchAndLoadTable(bookTable, searchKeyword);
     }//GEN-LAST:event_btnSearchActionPerformed
@@ -203,33 +202,26 @@ public class homePage extends javax.swing.JFrame {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
        try {
-        // 1. Get ID
         String idStr = javax.swing.JOptionPane.showInputDialog(this, "Enter Book ID:");
         if (idStr == null) return; 
         
-        // 2. Get Title
         String name = javax.swing.JOptionPane.showInputDialog(this, "Enter Book Title:");
         if (name == null) return;
         
-        // 3. Get Author
         String author = javax.swing.JOptionPane.showInputDialog(this, "Enter Author:");
         if (author == null) return;
-        
-        // 4. Get Genre (The missing piece!)
+
         String genre = javax.swing.JOptionPane.showInputDialog(this, "Enter Genre:");
         if (genre == null) return;
-        
-        // 5. Get Year
+
         String yearStr = javax.swing.JOptionPane.showInputDialog(this, "Enter Year:");
         if (yearStr == null) return;
 
         int id = Integer.parseInt(idStr);
         int year = Integer.parseInt(yearStr);
 
-        // This call MUST match the 5 parameters in your DatabaseHandler
         DatabaseHandler.addBook(id, name, author, genre, year);
 
-        // Refresh the table
         DatabaseHandler.searchAndLoadTable(bookTable, "");
         javax.swing.JOptionPane.showMessageDialog(this, "Book added successfully!");
         

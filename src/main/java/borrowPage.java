@@ -218,10 +218,9 @@ public class borrowPage extends javax.swing.JFrame {
   int selectedRow = bookTable.getSelectedRow(); 
 
     if (selectedRow != -1) {
-        // 1. Get ID from table
+
         int id = (int) bookTable.getValueAt(selectedRow, 0);
 
-        // 2. Validation: Ensure name and program aren't empty
         String borrowerName = nameOfBorrower.getText().trim(); 
         String borrowerProgram = programOfTheBorrower.getText().trim();   
 
@@ -230,15 +229,12 @@ public class borrowPage extends javax.swing.JFrame {
             return;
         }
 
-        // 3. Construct Date
         String dateStr = cbDate.getSelectedItem() + " " + 
                          cbMonth.getSelectedItem() + " " + 
                          cbYear.getSelectedItem();
 
-        // 4. Execute Borrow
         DatabaseHandler.borrowBook(id, borrowerName, borrowerProgram, dateStr);
 
-        // 5. Refresh Table & Clear Fields
         DatabaseHandler.searchAndLoadTable(bookTable, "");
         nameOfBorrower.setText("");
         programOfTheBorrower.setText("");

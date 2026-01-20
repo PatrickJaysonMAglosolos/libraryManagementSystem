@@ -24,13 +24,12 @@ public class returnPage extends javax.swing.JFrame {
         populateDateSelectors();
     }
      private void populateDateSelectors() {
-    // Fill Days 1 to 31
+
     cbDate.removeAllItems();
     for (int i = 1; i <= 31; i++) {
         cbDate.addItem(String.valueOf(i));
     }
 
-    // Fill Months
     cbMonth.removeAllItems();
     String[] months = {"January", "February", "March", "April", "May", "June", 
                        "July", "August", "September", "October", "November", "December"};
@@ -38,7 +37,6 @@ public class returnPage extends javax.swing.JFrame {
         cbMonth.addItem(m);
     }
 
-    // Fill Years
     cbYear.removeAllItems();
     for (int i = 2026; i <= 2026; i++) {
         cbYear.addItem(String.valueOf(i));
@@ -221,16 +219,13 @@ public class returnPage extends javax.swing.JFrame {
    int selectedRow = tableBook.getSelectedRow(); 
 
     if (selectedRow != -1) {
-        // 1. Get the Book ID (Assuming ID is in the first column)
+
         int id = (int) tableBook.getValueAt(selectedRow, 0);
 
-        // 2. Execute the return in the database
         DatabaseHandler.returnBook(id);
 
-        // 3. Refresh the table to remove the returned book from the view
         DatabaseHandler.searchAndLoadTable(tableBook, "");
-        
-        // 4. Reset UI elements
+
         name.setText("");
         program.setText("");
         

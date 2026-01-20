@@ -11,10 +11,6 @@ public class DatabaseHandler {
         return DriverManager.getConnection(URL);
     }
 
-    /**
-     * Prints the absolute path of the database to the console 
-     * so you can find the exact file to delete if needed.
-     */
     public static void printDatabasePath() {
         java.io.File file = new java.io.File("library_db.db");
         System.out.println("DATABASE LOCATION: " + file.getAbsolutePath());
@@ -34,14 +30,12 @@ public class DatabaseHandler {
         
         try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            
-            // FORCED COLUMN ADDITION: This ensures the 'genre' column exists 
-            // even if the file was created by an older version of your code.
+
             try {
                 stmt.execute("ALTER TABLE books ADD COLUMN genre TEXT;");
                 System.out.println("Database updated: Genre column added.");
             } catch (SQLException e) {
-                // Error is ignored because it means the column already exists
+
             }
         } catch (SQLException e) {
             System.out.println("DB Init Error: " + e.getMessage());
@@ -49,7 +43,7 @@ public class DatabaseHandler {
     }
 
     private static void loadFilteredTable(JTable table, String sql, String keyword) {
-        // FIXED: Added "Genre" to the header array (Total 6 columns)
+
         String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year", "Status"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
 
@@ -60,7 +54,7 @@ public class DatabaseHandler {
             
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                // FIXED: Row data now matches the 6 headers above
+
                 model.addRow(new Object[]{
                     rs.getInt("id"),
                     rs.getString("name"),
@@ -102,7 +96,7 @@ public class DatabaseHandler {
 
     public static void loadSortedTable(JTable table, int sortColumnIndex) {
         String sql = "SELECT * FROM books";
-        // FIXED: Added "Genre" to header array
+
         String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year", "Status"};
         try (Connection conn = connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             List<Object[]> dataList = new ArrayList<>();
@@ -162,7 +156,7 @@ public class DatabaseHandler {
         }
     }
 
-    // --- HEAPSORT LOGIC ---
+
     public static void heapSort(Object[][] data, int column) {
         int n = data.length;
         for (int i = n / 2 - 1; i >= 0; i--) heapify(data, n, i, column);
