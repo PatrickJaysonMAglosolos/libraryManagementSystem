@@ -25,21 +25,19 @@ public class borrowPage extends javax.swing.JFrame {
         
     }
     private void populateDateSelectors() {
-    // Fill Days 1 to 31
+    
     cbDate.removeAllItems();
     for (int i = 1; i <= 31; i++) {
         cbDate.addItem(String.valueOf(i));
     }
 
-    // Fill Months
-    cbMonth.removeAllItems();
+       cbMonth.removeAllItems();
     String[] months = {"January", "February", "March", "April", "May", "June", 
                        "July", "August", "September", "October", "November", "December"};
     for (String m : months) {
         cbMonth.addItem(m);
     }
 
-    // Fill Years
     cbYear.removeAllItems();
     for (int i = 2026; i <= 2026; i++) {
         cbYear.addItem(String.valueOf(i));
@@ -239,7 +237,7 @@ public class borrowPage extends javax.swing.JFrame {
         nameOfBorrower.setText("");
         programOfTheBorrower.setText("");
         
-        javax.swing.JOptionPane.showMessageDialog(this, "Book Borrowed successfully by " + borrowerName);
+        javax.swing.JOptionPane.showMessageDialog(this, "Borrowed successfully by " + borrowerName);
         
     } else {
         javax.swing.JOptionPane.showMessageDialog(this, "Please select a book from the table first!");
