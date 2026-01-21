@@ -17,50 +17,88 @@ public class DatabaseHandler {
     }
 
     public static void initializeDatabase() {
-        String sql = "CREATE TABLE IF NOT EXISTS books ("
-                + "id INTEGER PRIMARY KEY,"
-                + "name TEXT NOT NULL,"
-                + "author TEXT,"
-                + "genre TEXT," 
-                + "year INTEGER,"
-                + "status TEXT DEFAULT 'Available',"
-                + "borrower_name TEXT,"
-                + "program TEXT,"
-                + "borrow_date TEXT);";
-        
         try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+            // 1. Create Users Table
+            stmt.execute("CREATE TABLE IF NOT EXISTS users ("
+                    + "u_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "username TEXT UNIQUE,"
+                    + "password TEXT);");
 
-            try {
-                stmt.execute("ALTER TABLE books ADD COLUMN genre TEXT;");
-                System.out.println("Database updated: Genre column added.");
-            } catch (SQLException e) {
-
-            }
+            // 2. Create Books Table with renamed column and user link
+            stmt.execute("CREATE TABLE IF NOT EXISTS books ("
+                    + "id INTEGER PRIMARY KEY,"
+                    + "name TEXT NOT NULL,"
+                    + "author TEXT,"
+                    + "genre TEXT," 
+                    + "year_published INTEGER," 
+                    + "status TEXT DEFAULT 'Available',"
+                    + "borrower_name TEXT,"
+                    + "program TEXT,"
+                    + "borrow_date TEXT,"
+                    + "borrower_id INTEGER);");
+            
+            // Safety updates for existing databases
+            try { stmt.execute("ALTER TABLE books ADD COLUMN borrower_id INTEGER;"); } catch (SQLException e) {}
+            try { stmt.execute("ALTER TABLE books RENAME COLUMN year TO year_published;"); } catch (SQLException e) {}
+            
         } catch (SQLException e) {
             System.out.println("DB Init Error: " + e.getMessage());
         }
     }
 
-    private static void loadFilteredTable(JTable table, String sql, String keyword) {
+    // --- NEW REGISTRATION METHOD ---
+    public static boolean registerUser(String username, String password) {
+        String sql = "INSERT INTO users(username, password) VALUES(?, ?)";
+        try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            pstmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Registration Error: " + e.getMessage());
+            return false;
+        }
+    }
 
-        String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year", "Status"};
+    public static boolean verifyLogin(String user, String pass) {
+        String sql = "SELECT u_id FROM users WHERE username = ? AND password = ?";
+        try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, user);
+            pstmt.setString(2, pass);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                // Ensure your UserSession class uses these names
+                userSession.currentUserId = rs.getInt("u_id");
+                userSession.currentUsername = user;
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println("Login Error: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private static void loadFilteredTable(JTable table, String sql, String keyword, boolean isPersonal) {
+        String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year Published", "Status"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
 
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, "%" + keyword + "%");
-            pstmt.setString(2, "%" + keyword + "%");
-            pstmt.setString(3, "%" + keyword + "%");
+            int paramIndex = 1;
+            if (isPersonal) {
+                pstmt.setInt(paramIndex++, userSession.currentUserId);
+            }
+            pstmt.setString(paramIndex++, "%" + keyword + "%");
+            pstmt.setString(paramIndex++, "%" + keyword + "%");
+            pstmt.setString(paramIndex++, "%" + keyword + "%");
             
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-
                 model.addRow(new Object[]{
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getString("author"),
                     rs.getString("genre"), 
-                    rs.getInt("year"),
+                    rs.getInt("year_published"),
                     rs.getString("status")
                 });
             }
@@ -72,16 +110,16 @@ public class DatabaseHandler {
 
     public static void loadAvailableBooks(JTable table, String keyword) {
         String sql = "SELECT * FROM books WHERE status = 'Available' AND (name LIKE ? OR author LIKE ? OR id LIKE ?)";
-        loadFilteredTable(table, sql, keyword);
+        loadFilteredTable(table, sql, keyword, false);
     }
 
     public static void loadBorrowedBooks(JTable table, String keyword) {
-        String sql = "SELECT * FROM books WHERE status = 'Borrowed' AND (name LIKE ? OR author LIKE ? OR id LIKE ?)";
-        loadFilteredTable(table, sql, keyword);
+        String sql = "SELECT * FROM books WHERE status = 'Borrowed' AND borrower_id = ? AND (name LIKE ? OR author LIKE ? OR id LIKE ?)";
+        loadFilteredTable(table, sql, keyword, true);
     }
 
     public static void addBook(int id, String name, String author, String genre, int year) {
-        String sql = "INSERT INTO books(id, name, author, genre, year, status) VALUES(?,?,?,?,?,'Available')";
+        String sql = "INSERT INTO books(id, name, author, genre, year_published, status) VALUES(?,?,?,?,?,'Available')";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.setString(2, name);
@@ -96,18 +134,13 @@ public class DatabaseHandler {
 
     public static void loadSortedTable(JTable table, int sortColumnIndex) {
         String sql = "SELECT * FROM books";
-
-        String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year", "Status"};
+        String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year Published", "Status"};
         try (Connection conn = connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             List<Object[]> dataList = new ArrayList<>();
             while (rs.next()) {
                 dataList.add(new Object[]{
-                    rs.getInt("id"), 
-                    rs.getString("name"), 
-                    rs.getString("author"), 
-                    rs.getString("genre"), 
-                    rs.getInt("year"), 
-                    rs.getString("status")
+                    rs.getInt("id"), rs.getString("name"), rs.getString("author"), 
+                    rs.getString("genre"), rs.getInt("year_published"), rs.getString("status")
                 });
             }
             Object[][] data = dataList.toArray(new Object[0][]);
@@ -119,17 +152,18 @@ public class DatabaseHandler {
     }
 
     public static void searchAndLoadTable(JTable table, String keyword) {
-        String sql = "SELECT * FROM books WHERE name LIKE ? OR author LIKE ? OR id LIKE ?";
-        loadFilteredTable(table, sql, keyword);
+        String sql = "SELECT * FROM books WHERE (name LIKE ? OR author LIKE ? OR id LIKE ?)";
+        loadFilteredTable(table, sql, keyword, false);
     }
 
     public static void borrowBook(int bookId, String bName, String program, String bDate) {
-        String sql = "UPDATE books SET status = 'Borrowed', borrower_name = ?, program = ?, borrow_date = ? WHERE id = ?";
+        String sql = "UPDATE books SET status = 'Borrowed', borrower_name = ?, program = ?, borrow_date = ?, borrower_id = ? WHERE id = ?";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, bName);
             pstmt.setString(2, program);
             pstmt.setString(3, bDate);
-            pstmt.setInt(4, bookId);
+            pstmt.setInt(4, userSession.currentUserId);
+            pstmt.setInt(5, bookId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Borrow Error: " + e.getMessage());
@@ -137,7 +171,7 @@ public class DatabaseHandler {
     }
 
     public static void returnBook(int bookId) {
-        String sql = "UPDATE books SET status = 'Available', borrower_name = NULL, program = NULL, borrow_date = NULL WHERE id = ?";
+        String sql = "UPDATE books SET status = 'Available', borrower_name = NULL, program = NULL, borrow_date = NULL, borrower_id = NULL WHERE id = ?";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, bookId);
             pstmt.executeUpdate();
@@ -155,7 +189,6 @@ public class DatabaseHandler {
             System.out.println("Remove Error: " + e.getMessage());
         }
     }
-
 
     public static void heapSort(Object[][] data, int column) {
         int n = data.length;
