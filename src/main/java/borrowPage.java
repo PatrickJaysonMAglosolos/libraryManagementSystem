@@ -20,7 +20,6 @@ public class borrowPage extends javax.swing.JFrame {
         initComponents();
         setResizable(false);
         setLocationRelativeTo(null);
-        // Changed to DISPOSE so it doesn't close the whole app
         setDefaultCloseOperation(EXIT_ON_CLOSE); 
         DatabaseHandler.loadAvailableBooks(bookTable, "");
     }

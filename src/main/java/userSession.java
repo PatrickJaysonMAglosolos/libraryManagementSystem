@@ -8,7 +8,7 @@
  * @author Patrick
  */
 public class userSession {
-    public static int currentUserId = -1; // -1 means no user is logged in
+    public static int currentUserId = -1; 
     public static String currentUsername = "";
-    public static String currentUserProgram = ""; // ADD THIS
+    public static String currentUserProgram = ""; 
 }

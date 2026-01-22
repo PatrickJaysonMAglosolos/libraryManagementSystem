@@ -15,14 +15,12 @@ public class DatabaseHandler {
 
     public static void initializeDatabase() {
         try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
-            // 1. Users Table
             stmt.execute("CREATE TABLE IF NOT EXISTS users ("
                     + "u_id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + "username TEXT UNIQUE,"
                     + "password TEXT,"
                     + "program TEXT);"); 
 
-            // 2. Books Table
             stmt.execute("CREATE TABLE IF NOT EXISTS books ("
                     + "id TEXT PRIMARY KEY," 
                     + "name TEXT NOT NULL,"
@@ -36,7 +34,7 @@ public class DatabaseHandler {
                     + "due_date TEXT,"
                     + "borrower_id INTEGER);");
             
-            // Migrations for existing databases
+ 
             try { stmt.execute("ALTER TABLE books ADD COLUMN borrower_id INTEGER;"); } catch (SQLException e) {}
             try { stmt.execute("ALTER TABLE books RENAME COLUMN year TO year_published;"); } catch (SQLException e) {}
             try { stmt.execute("ALTER TABLE users ADD COLUMN program TEXT;"); } catch (SQLException e) {}
@@ -47,7 +45,7 @@ public class DatabaseHandler {
         }
     }
 
-    // --- Table Loading Logic ---
+
     private static void loadFilteredTable(JTable table, String sql, String keyword, boolean isPersonal) {
         // Updated Column Header to show "Days Left" instead of just the static Due Date
         String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year Published", "Status", "Days Remaining"};
@@ -64,9 +62,9 @@ public class DatabaseHandler {
             
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                // --- Start of Days Remaining Calculation ---
+
                 String dueDateStr = rs.getString("due_date");
-                String daysDisplay = "N/A"; // Default if not borrowed
+                String daysDisplay = "N/A"; 
 
                 if (dueDateStr != null && !dueDateStr.isEmpty()) {
                     try {
@@ -82,10 +80,10 @@ public class DatabaseHandler {
                             daysDisplay = diff + " days left";
                         }
                     } catch (Exception e) {
-                        daysDisplay = dueDateStr; // Fallback to raw string if parsing fails
+                        daysDisplay = dueDateStr; 
                     }
                 }
-                // --- End of Calculation ---
+ 
 
                 model.addRow(new Object[]{
                     rs.getString("id"), rs.getString("name"), rs.getString("author"),
@@ -126,7 +124,7 @@ public class DatabaseHandler {
                     rs.getString("genre"), 
                     rs.getInt("year_published"), 
                     rs.getString("status"),
-                    "Available" // Available books don't have days remaining
+                    "Available" 
                 });
             }
             
@@ -175,7 +173,7 @@ public class DatabaseHandler {
         } catch (SQLException e) { System.out.println("Remove Error: " + e.getMessage()); }
     }
 
-    // --- User Management ---
+
     public static boolean registerUser(String username, String password, String program) {
         String sql = "INSERT INTO users(username, password, program) VALUES(?, ?, ?)";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -203,7 +201,7 @@ public class DatabaseHandler {
         return false;
     }
 
-    // --- Sorting ---
+ 
     public static void heapSort(Object[][] data, int column) {
         int n = data.length;
         for (int i = n / 2 - 1; i >= 0; i--) heapify(data, n, i, column);

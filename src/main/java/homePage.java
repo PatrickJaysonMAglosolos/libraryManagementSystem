@@ -221,10 +221,8 @@ public class homePage extends javax.swing.JFrame {
         String yearStr = javax.swing.JOptionPane.showInputDialog(this, "Enter Year:");
         if (yearStr == null) return;
 
-        // ID is now a String, so we only parse the Year
         int year = Integer.parseInt(yearStr);
 
-        // Call the updated DatabaseHandler method
         DatabaseHandler.addBook(id, name, author, genre, year);
 
         DatabaseHandler.searchAndLoadTable(bookTable, "");
@@ -240,7 +238,7 @@ public class homePage extends javax.swing.JFrame {
   int selectedRow = bookTable.getSelectedRow(); 
 
     if (selectedRow != -1) {
-        // Get the ID as a String to handle ISBNs
+
         String id = bookTable.getValueAt(selectedRow, 0).toString();
         
         int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 

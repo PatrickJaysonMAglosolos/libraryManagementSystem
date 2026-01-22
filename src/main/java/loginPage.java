@@ -165,7 +165,7 @@ public class loginPage extends javax.swing.JFrame {
         // TODO add your handling code here:
     String user = tfProgram.getText();
     String pass = new String(tfPassword.getPassword());
-    String prog = tfProgram.getText(); // Get the program from the new text field
+    String prog = tfProgram.getText(); 
 
     if (DatabaseHandler.registerUser(user, pass, prog)) {
         javax.swing.JOptionPane.showMessageDialog(this, "Registration Successful!");
