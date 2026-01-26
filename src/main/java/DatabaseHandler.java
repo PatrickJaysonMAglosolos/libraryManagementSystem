@@ -5,12 +5,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.security.MessageDigest; // Added for security
+import java.security.NoSuchAlgorithmException; // Added for security
 
 public class DatabaseHandler {
     private static final String URL = "jdbc:sqlite:library_db.db";
 
     public static Connection connect() throws SQLException {
         return DriverManager.getConnection(URL);
+    }
+
+    // --- Added Security Logic: Password Hashing ---
+    private static String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            return password; // Fallback
+        }
     }
 
     public static void initializeDatabase() {
@@ -34,7 +51,7 @@ public class DatabaseHandler {
                     + "due_date TEXT,"
                     + "borrower_id INTEGER);");
             
-            // Migration handling (in case columns were missing from previous versions)
+            // Migration handling
             try { stmt.execute("ALTER TABLE books ADD COLUMN borrower_id INTEGER;"); } catch (SQLException e) {}
             try { stmt.execute("ALTER TABLE books RENAME COLUMN year TO year_published;"); } catch (SQLException e) {}
             try { stmt.execute("ALTER TABLE users ADD COLUMN program TEXT;"); } catch (SQLException e) {}
@@ -67,7 +84,7 @@ public class DatabaseHandler {
                 if (dueDateStr != null && !dueDateStr.isEmpty()) {
                     try {
                         LocalDate today = LocalDate.now();
-                        LocalDate dueDate = LocalDate.parse(dueDateStr); // Expects yyyy-MM-dd
+                        LocalDate dueDate = LocalDate.parse(dueDateStr);
                         long diff = ChronoUnit.DAYS.between(today, dueDate);
                         
                         if (diff < 0) {
@@ -109,19 +126,32 @@ public class DatabaseHandler {
 
     public static void loadSortedTable(JTable table, int sortColumnIndex) {
         String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year Published", "Status", "Days Remaining"};
-        String sql = "SELECT * FROM books WHERE status = 'Available'";
-        
+        String sql = "SELECT * FROM books";
+    
         try (Connection conn = connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             List<Object[]> dataList = new ArrayList<>();
             while (rs.next()) {
+                String status = rs.getString("status");
+                String dueDateStr = rs.getString("due_date");
+                String daysDisplay = "Available"; 
+
+                if (status.equals("Borrowed") && dueDateStr != null && !dueDateStr.isEmpty()) {
+                    try {
+                        java.time.LocalDate today = java.time.LocalDate.now();
+                        java.time.LocalDate dueDate = java.time.LocalDate.parse(dueDateStr);
+                        long diff = java.time.temporal.ChronoUnit.DAYS.between(today, dueDate);
+                        
+                        if (diff < 0) daysDisplay = "OVERDUE (" + Math.abs(diff) + " days)";
+                        else if (diff == 0) daysDisplay = "DUE TODAY";
+                        else daysDisplay = diff + " days left";
+                    } catch (Exception e) {
+                        daysDisplay = dueDateStr; 
+                    }
+                }
+
                 dataList.add(new Object[]{
-                    rs.getString("id"), 
-                    rs.getString("name"), 
-                    rs.getString("author"), 
-                    rs.getString("genre"), 
-                    rs.getInt("year_published"), 
-                    rs.getString("status"),
-                    "Available" 
+                    rs.getString("id"), rs.getString("name"), rs.getString("author"), 
+                    rs.getString("genre"), rs.getInt("year_published"), status, daysDisplay
                 });
             }
             
@@ -169,23 +199,24 @@ public class DatabaseHandler {
         } catch (SQLException e) { System.out.println("Remove Error: " + e.getMessage()); }
     }
 
-
+    // Improved Register with Password Hashing
     public static boolean registerUser(String username, String password, String program) {
         String sql = "INSERT INTO users(username, password, program) VALUES(?, ?, ?)";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            pstmt.setString(2, hashPassword(password)); // Hashed
             pstmt.setString(3, program);
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) { return false; }
     }
 
+    // Improved Login with Password Hashing
     public static boolean verifyLogin(String user, String pass) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, user);
-            pstmt.setString(2, pass);
+            pstmt.setString(2, hashPassword(pass)); // Check against hash
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 userSession.currentUserId = rs.getInt("u_id");
