@@ -3,8 +3,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JTable;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate; // Added for automatic date math
-import java.time.temporal.ChronoUnit; // Added to calculate days between dates
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 public class DatabaseHandler {
     private static final String URL = "jdbc:sqlite:library_db.db";
@@ -47,7 +47,6 @@ public class DatabaseHandler {
 
 
     private static void loadFilteredTable(JTable table, String sql, String keyword, boolean isPersonal) {
-        // Updated Column Header to show "Days Left" instead of just the static Due Date
         String[] columns = {"Book ID", "Book Name", "Author", "Genre", "Year Published", "Status", "Days Remaining"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -69,7 +68,7 @@ public class DatabaseHandler {
                 if (dueDateStr != null && !dueDateStr.isEmpty()) {
                     try {
                         LocalDate today = LocalDate.now();
-                        LocalDate dueDate = LocalDate.parse(dueDateStr); // Expects yyyy-MM-dd
+                        LocalDate dueDate = LocalDate.parse(dueDateStr);
                         long diff = ChronoUnit.DAYS.between(today, dueDate);
                         
                         if (diff < 0) {
@@ -136,7 +135,6 @@ public class DatabaseHandler {
         }
     }
 
-    // --- Action Methods ---
     public static void addBook(String id, String name, String author, String genre, int year) {
         String sql = "INSERT INTO books(id, name, author, genre, year_published, status) VALUES(?,?,?,?,?,'Available')";
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {

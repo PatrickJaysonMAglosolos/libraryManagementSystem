@@ -133,7 +133,6 @@ public class borrowPage extends javax.swing.JFrame {
             String borrower = userSession.currentUsername;
             String program = userSession.currentUserProgram;
 
-            // AUTOMATIC 7-DAY LOGIC
             LocalDate today = LocalDate.now();
             LocalDate oneWeekLater = today.plusDays(7);
 

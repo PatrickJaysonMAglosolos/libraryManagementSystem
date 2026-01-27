@@ -240,7 +240,7 @@ public class homePage extends javax.swing.JFrame {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         // TODO add your handling code here:int selectedRow = tblBooks.getSelectedRow();
-  int selectedRow = bookTable.getSelectedRow(); 
+    int selectedRow = bookTable.getSelectedRow(); 
 
     if (selectedRow != -1) {
 

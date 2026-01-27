@@ -180,10 +180,7 @@ public class returnPage extends javax.swing.JFrame {
     if (selectedRow != -1) {
         String bookId = tableBook.getValueAt(selectedRow, 0).toString();
         
-        // The DatabaseHandler handles clearing the borrower info and dates
         DatabaseHandler.returnBook(bookId);
-        
-        // Refresh the personal borrowed books table
         DatabaseHandler.loadBorrowedBooks(tableBook, "");
         javax.swing.JOptionPane.showMessageDialog(this, "Book returned successfully!");
     } else {
@@ -198,7 +195,7 @@ public class returnPage extends javax.swing.JFrame {
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         // TODO add your handling code here:
-        String query = txtFReturn.getText();
+    String query = txtFReturn.getText();
     DatabaseHandler.loadBorrowedBooks(tableBook, query);
     }//GEN-LAST:event_btnSearchActionPerformed
 
